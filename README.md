@@ -54,19 +54,25 @@ shared tuning constants (tracking-wheel offsets) are in
 CLOCKWORK/
 ├── include/
 │   ├── robot.hpp        # shared device/subsystem/chassis declarations + constants
-│   ├── autons.hpp       # autonomous routine declarations
-│   └── motions.hpp      # reusable motion primitives
+│   └── autons.hpp       # autonomous routine declarations
 ├── src/
 │   ├── main.cpp         # PROS entry points: initialize / autonomous / opcontrol wiring
 │   ├── robot.cpp        # all device + chassis definitions (ports, PID, odom)
 │   ├── opcontrol.cpp    # driver control
-│   ├── motions.cpp      # motion primitive implementations
 │   └── autons/
 │       ├── registry.cpp # registers every routine with the selector (order = screen order)
 │       ├── match.cpp    # competition routines
 │       └── calibration.cpp # odom/PID calibration + test routines
 ├── clock.sh             # build / upload helper (uses the bundled PROS toolchain)
 └── project.pros         # PROS project + template manifest
+```
+
+Motion primitives and the intake wrapper come from the **[clockwork](https://github.com/AkshobyaRaoSWE/clockwork-lib)**
+PROS library (installed as a template). Install/upgrade it with:
+
+```bash
+pros c add-depot clockwork https://raw.githubusercontent.com/AkshobyaRaoSWE/clockwork-lib/main/depot.json
+pros c apply clockwork
 ```
 
 **To add an autonomous:** write the function in `src/autons/match.cpp`, declare
@@ -89,11 +95,14 @@ Registered in [`src/autons/registry.cpp`](src/autons/registry.cpp):
 | Left 7 Ball      | `seven_ball_left`           | Match auton, left side               |
 | Right 7 Ball     | `seven_ball_right`          | Match auton, right side              |
 | Solo Awp         | `solo_awp`                  | Solo autonomous win point            |
-| 4+3 Right / Left | `four_three_*`              | Match autons (stubs / in progress)   |
 | Horizontal Offset| `horizontal_offset`         | Calibrate horizontal tracking-wheel offset |
 | Vertical Offset  | `vertical_offset`           | Calibrate vertical tracking-wheel offset   |
 | PID Test         | `pid_test`                  | Sanity-check turn/drive PID          |
-| 2-Phase Drive    | `two_phase_drive_demo`      | Demo of `drive_full_then_slow`       |
+| 2-Phase Drive    | `two_phase_drive_demo`      | Demo of `Motion::driveFullThenSlow`  |
+
+> `four_three_right` / `four_three_left` are empty stubs and are **not**
+> registered (a registered empty routine would show as a dead selector button).
+> Fill them in, then add them to `registry.cpp`.
 
 ### Calibration workflow
 
@@ -105,36 +114,28 @@ turn-and-straight pattern so you can confirm the pose ends where expected.
 
 ---
 
-## Motion primitives
+## Motion + intake helpers
 
-[`include/motions.hpp`](include/motions.hpp) / [`src/motions.cpp`](src/motions.cpp):
-
-### `drive_full_then_slow`
-
-Drives straight with a two-phase speed profile — **full speed** for a first
-distance, then **decelerates to a lower speed** for a second distance. Useful
-for approaching a target fast but arriving under control. Heading is held with a
-simple P controller so the robot tracks straight, and the driver curve is
-bypassed.
+These come from the [clockwork](https://github.com/AkshobyaRaoSWE/clockwork-lib)
+library. In autons, `chassis` and the `intake` roller are the shared globals
+from `robot.cpp`.
 
 ```cpp
-motions::drive_full_then_slow(
-    float full_dist,     // inches driven at full_speed
-    float slow_dist,     // inches driven at slow_speed after the full phase
-    int   slow_speed,    // reduced power, -127..127 (the "slow" speed)
-    int   timeout_ms,    // safety cap; motion always ends by this time
-    int   full_speed = 127,   // power for the first phase, -127..127
-    float heading_kp = 2.0f); // P gain, power per degree of heading error
+#include "clockwork/clockwork.hpp"
+
+clockwork::Motion motion(&chassis);
+motion.driveFullThenSlow(24, 12, 40, 3000); // full speed 24 in, then 40-power 12 in
+motion.driveDistance(24, 100, 3000);        // straight 24 in, heading-held
+motion.driveTimed(400, 60);                 // 60 power for 400 ms
+
+intake.in();               // spin intake in    (was intake_motor_1/2.move(127))
+intake.out();              // spin intake out
+intake.stop();             // stop
+intake.pulse(-127, 300);   // eject 300 ms, then stop
 ```
 
-Distance is measured from the pose at the call site, so the robot must have a
-valid heading/pose (call `chassis.setPose(...)` first). Pass negative speeds to
-run the profile in reverse.
-
-```cpp
-// Full speed for 24 in, then coast at 40 power for the next 12 in.
-motions::drive_full_then_slow(24, 12, 40, 3000);
-```
+See the [library README](https://github.com/AkshobyaRaoSWE/clockwork-lib) for
+the full API.
 
 ---
 

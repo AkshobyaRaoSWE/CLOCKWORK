@@ -18,8 +18,8 @@ lemlib::Drivetrain drivetrain(
 );
 
 // ---- Intake ----
-pros::Motor intake_motor_1(-12);
-pros::Motor intake_motor_2(-19);
+pros::MotorGroup intake_motors({-12, -19});
+clockwork::Roller intake(&intake_motors);
 
 // ---- Pneumatics ----
 pros::adi::Pneumatics wing('A', false);

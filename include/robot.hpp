@@ -5,10 +5,12 @@
 // drive the robot (autons, opcontrol, calibration).
 
 #include "lemlib/api.hpp"
+#include "clockwork/clockwork.hpp"
 #include "titanselect/titanselect.hpp"
 #include "pros/adi.hpp"
 #include "pros/misc.hpp"
 #include "pros/motors.hpp"
+#include "pros/motor_group.hpp"
 
 // Tracking wheel offsets (inches). Shared by odom config + calibration.
 inline constexpr float k_vert_tw_offset_in = -2.4352f;
@@ -17,9 +19,9 @@ inline constexpr float k_horiz_tw_offset_in = -3.045f;
 // Input devices
 extern pros::Controller master;
 
-// Intake
-extern pros::Motor intake_motor_1;
-extern pros::Motor intake_motor_2;
+// Intake (motor group + a clockwork::Roller wrapping it)
+extern pros::MotorGroup intake_motors;
+extern clockwork::Roller intake;
 
 // Pneumatics
 extern pros::adi::Pneumatics wing;

@@ -8,8 +8,7 @@ namespace autons {
 void seven_ball_right() {
 	chassis.setBrakeMode(pros::E_MOTOR_BRAKE_BRAKE);
 	chassis.setPose(0, 0, 0);
-	intake_motor_1.move(127);
-	intake_motor_2.move(127);
+	intake.in();
 	wing.extend();
 	chassis.moveToPoint(9.5, 43, 900, {.maxSpeed = 90, .minSpeed = 20});
 	pros::delay(800);
@@ -24,11 +23,9 @@ void seven_ball_right() {
 	chassis.moveToPoint(32, 35, 2500, {.forwards = false, .maxSpeed = 45});
 	chassis.waitUntilDone();
 	wing.retract();
-	intake_motor_1.move(-127);
-	intake_motor_2.move(-127);
+	intake.out();
 	pros::delay(300);
-	intake_motor_1.move(127);
-	intake_motor_2.move(127);
+	intake.in();
 	pros::delay(1000);
 	chassis.moveToPose(23, 25, 214, 900, {.lead = 0.5, .maxSpeed = 90});
 	chassis.turnToHeading(172, 500);
@@ -38,8 +35,7 @@ void seven_ball_right() {
 void seven_ball_left() {
 	chassis.setBrakeMode(pros::E_MOTOR_BRAKE_BRAKE);
 	chassis.setPose(0, 0, 0);
-	intake_motor_1.move(127);
-	intake_motor_2.move(127);
+	intake.in();
 	wing.extend();
 	chassis.moveToPoint(-11, 33, 900, {.maxSpeed = 90});
 	pros::delay(800);
@@ -55,11 +51,9 @@ void seven_ball_left() {
 	chassis.waitUntilDone();
 	wing.retract();
 	tounge.retract();
-	intake_motor_1.move(-127);
-	intake_motor_2.move(-127);
+	intake.out();
 	pros::delay(300);
-	intake_motor_1.move(127);
-	intake_motor_2.move(127);
+	intake.in();
 	pros::delay(1000);
 	chassis.moveToPose(-43, 20, -185, 900, {.lead = 0.5}, false);
 	chassis.turnToHeading(-172, 500, {}, false);
@@ -70,8 +64,7 @@ void solo_awp() {
 	chassis.setBrakeMode(pros::E_MOTOR_BRAKE_BRAKE);
 	chassis.setPose(0, 0, 0);
 	wing.extend();
-	intake_motor_1.move(127);
-	intake_motor_2.move(127);
+	intake.in();
 	tounge.extend();
 	chassis.moveToPoint(0, 45, 2000, {.maxSpeed = 80});
 	chassis.waitUntilDone();

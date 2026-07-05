@@ -1,7 +1,7 @@
 #include "main.h"
 #include "robot.hpp"
 #include "autons.hpp"
-#include "motions.hpp"
+#include "clockwork/clockwork.hpp"
 #include "pros/rtos.hpp"
 #include <cmath>
 
@@ -81,7 +81,8 @@ void two_phase_drive_demo() {
 	chassis.setBrakeMode(pros::E_MOTOR_BRAKE_BRAKE);
 	chassis.setPose(0, 0, 0);
 	// Full speed for 24 in, then coast at 40 power for the next 12 in.
-	motions::drive_full_then_slow(24, 12, 40, 3000);
+	clockwork::Motion motion(&chassis);
+	motion.driveFullThenSlow(24, 12, 40, 3000);
 }
 
 } // namespace autons

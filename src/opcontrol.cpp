@@ -22,6 +22,9 @@ void opcontrol() {
 		chassis.arcade(leftY, rightX);
 
 		const std::uint32_t now = pros::millis();
+		// NOTE: the `r2` and `x` locals are cross-wired on purpose so the button
+		// mapping matches the driver's muscle memory: `r2` holds the X button,
+		// `x` holds the R2 button. Keep this in mind below.
 		bool l1 = master.get_digital(pros::E_CONTROLLER_DIGITAL_L1);
 		bool l2 = master.get_digital(pros::E_CONTROLLER_DIGITAL_L2);
 		bool r1 = master.get_digital(pros::E_CONTROLLER_DIGITAL_R1);
@@ -61,14 +64,11 @@ void opcontrol() {
 		consider(l2, IntakeDriver::L2Out, l2_out_press_ms, 3);
 
 		if (driver == IntakeDriver::L2Out) {
-			intake_motor_1.move(-127);
-			intake_motor_2.move(-127);
+			intake.out();
 		} else if (driver == IntakeDriver::L1 || driver == IntakeDriver::L2Fwd || driver == IntakeDriver::R2) {
-			intake_motor_1.move(127);
-			intake_motor_2.move(127);
+			intake.in();
 		} else {
-			intake_motor_1.move(0);
-			intake_motor_2.move(0);
+			intake.stop();
 		}
 
 		if (driver == IntakeDriver::L1) {
